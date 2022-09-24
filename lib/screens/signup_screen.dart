@@ -1,3 +1,4 @@
+import 'package:bloodgency/components/button_component.dart';
 import 'package:bloodgency/screens/login_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
@@ -175,18 +176,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(
                 height: 40,
               ),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(25), color: primary),
-                  child: Text(
-                    "REGISTER",
-                    style: TextStyle(color: white),
-                  ),
-                ),
-              ),
+              PrimaryButton(text: "REGISTER", onTap: () {}),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
