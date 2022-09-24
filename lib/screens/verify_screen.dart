@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloodgency/components/button_component.dart';
+import 'package:bloodgency/screens/login_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -18,16 +19,15 @@ class VerificationScreen extends StatefulWidget {
 
 class _VerificationScreenState extends State<VerificationScreen> {
   TextEditingController textEditingController = TextEditingController();
-  // ..text = "123456";
+  late bool verified;
 
   // ignore: close_sinks
   StreamController<ErrorAnimationType>? errorController;
 
   String currentText = "";
   final formKey = GlobalKey<FormState>();
-  bool canSend = true;
+  bool canSend = false;
   bool resend = true;
-
   String errorText = "";
 
   late Timer _timer;
@@ -54,6 +54,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   void initState() {
+    verified = false;
     errorController = StreamController<ErrorAnimationType>();
     startTimer();
     super.initState();
@@ -65,6 +66,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
     _timer.cancel();
     super.dispose();
   }
+
+  void verify(String token) {}
 
   snackBar(String? message) {
     return ScaffoldMessenger.of(context).showSnackBar(
@@ -81,67 +84,84 @@ class _VerificationScreenState extends State<VerificationScreen> {
       backgroundColor: white,
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+        alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Form(
-                  key: formKey,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 30),
-                    child: PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      obscureText: false,
-                      onChanged: (value) {
-                        if (value.length == 6) {
-                          setState(() {
-                            canSend = true;
-                          });
-                        } else {
-                          setState(() {
-                            canSend = false;
-                          });
-                        }
-                      },
-                      cursorColor: primary,
-                      controller: textEditingController,
-                      animationDuration: const Duration(milliseconds: 300),
-                      errorAnimationController: errorController,
-                      animationType: AnimationType.fade,
-                      boxShadows: const [
-                        BoxShadow(
-                          offset: Offset(0, 1),
-                          color: textField,
-                          blurRadius: 1,
-                        )
-                      ],
-                    ),
+            verified
+                ? Image(image: AssetImage("assets/images/success.png"))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Form(
+                        key: formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 30),
+                          child: PinCodeTextField(
+                            appContext: context,
+                            length: 6,
+                            obscureText: false,
+                            onChanged: (value) {
+                              if (value.length == 6) {
+                                setState(() {
+                                  canSend = true;
+                                });
+                              } else {
+                                setState(() {
+                                  canSend = false;
+                                });
+                              }
+                            },
+                            cursorColor: primary,
+                            controller: textEditingController,
+                            animationDuration:
+                                const Duration(milliseconds: 300),
+                            errorAnimationController: errorController,
+                            animationType: AnimationType.fade,
+                            boxShadows: const [
+                              BoxShadow(
+                                offset: Offset(0, 1),
+                                color: textField,
+                                blurRadius: 1,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      resend
+                          ? Text(
+                              "Resend in ${_start} Second.",
+                              style: TextStyle(color: primary),
+                            )
+                          : TextButton(
+                              onPressed: startTimer,
+                              child: Text(
+                                "Resend",
+                                style: TextStyle(color: primary),
+                              ))
+                    ],
                   ),
-                ),
-                resend
-                    ? Text(
-                        "Resend in ${_start} Second.",
-                        style: TextStyle(color: primary),
-                      )
-                    : TextButton(
-                        onPressed: startTimer,
-                        child: Text(
-                          "Resend",
-                          style: TextStyle(color: primary),
-                        ))
-              ],
-            ),
             SizedBox(
               height: 50,
             ),
             PrimaryButton(
               enable: canSend,
-              text: "Verifikasi",
-              onTap: () {},
+              text: verified ? "Selesai" : "Verifikasi",
+              onTap: () {
+                if (verified) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(),
+                    ),
+                  );
+                } else {
+                  setState(() {
+                    verified = true;
+                  });
+                }
+              },
             )
           ],
         ),
