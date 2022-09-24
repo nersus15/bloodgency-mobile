@@ -1,3 +1,4 @@
+import 'package:bloodgency/components/button_component.dart';
 import 'package:bloodgency/screens/ResetPasswordScreen.dart';
 import 'package:bloodgency/screens/signup_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
@@ -86,20 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   height: 50,
                 ),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(25),
-                        color: primary),
-                    child: Text(
-                      "LOG IN",
-                      style: TextStyle(color: white),
-                    ),
-                  ),
-                ),
+                PrimaryButton(text: "LOG IN", onTap: () {}),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
