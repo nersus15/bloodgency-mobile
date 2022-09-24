@@ -25,9 +25,18 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongpress,
-      onDoubleTap: onDoubleTap,
+      onTap: () {
+        if (!enable) return;
+        onTap();
+      },
+      onLongPress: () {
+        if (!enable) return;
+        onLongpress!();
+      },
+      onDoubleTap: () {
+        if (!enable) return;
+        onDoubleTap!();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
         decoration: BoxDecoration(
