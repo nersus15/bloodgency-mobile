@@ -44,33 +44,24 @@ class Internet {
     );
   }
 
-  get({
+  void get({
     required String url,
     required VoidCallbackArg onSuccess,
     Map<String, String>? headers,
     VoidCallbackArg? onError,
-  }) async {
-    final response =
-        await http.get(Uri.parse(url), headers: headers).catchError(
-      (err) {
+  }) {
+    http.get(Uri.parse(url), headers: headers).then((response) {
+      if (response.statusCode == 200) {
+        print("Utils.Internet.fetch Success");
+        onSuccess(response);
+      } else {
         print("Utils.Internet.fetch Error");
-
-        onError!(err);
-      },
-      test: (error) {
-        print("Utils.Internet.fetch Error");
-        print(error);
-        return error is int && error >= 400;
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print("Utils.Internet.fetch Success");
-      onSuccess(response);
-    } else {
-      print("Utils.Internet.fetch Error");
-      onError!(response);
-    }
+        onError!(response);
+      }
+    }, onError: (err, stack) {
+      print("Future Error");
+      print(err);
+    });
   }
 
   // fetch data and send callback funtion
@@ -99,7 +90,7 @@ class Internet {
           }
         }
         print("Utils.Internet.fetch Start Request to $url$suffix");
-        await get(
+        get(
             url: "$url$suffix",
             onSuccess: onSuccess,
             onError: onError,
