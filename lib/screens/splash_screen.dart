@@ -22,19 +22,14 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Utils.internet.fetch(
       context: context,
-      headers: {
-        'X-RapidAPI-Key': 'beefe7b6eamsh027aa7179884c8ap135e99jsnfc04f913872c',
-        'X-RapidAPI-Host': 'wft-geo-db.p.rapidapi.com'
-      },
-      url: "https://wft-geo-db.p.rapidapi.com/v1/geo/cities/Q60/nearbyCities",
-      params: {'radius': '100'},
+      url: "https://ta.kamscode.site/futsal/ws/logout",
       onError: (response) async {
         Map<String, dynamic> body = await jsonDecode(response.body);
         print(body['message']);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => OnBoardingScreen(),
+            builder: (context) => const OnBoardingScreen(),
           ),
         );
       },
