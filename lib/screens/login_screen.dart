@@ -1,3 +1,4 @@
+import 'package:bloodgency/screens/ResetPasswordScreen.dart';
 import 'package:bloodgency/screens/signup_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ResetPasswordScreen()),
+                    );
+                  },
                   child: Text(
                     "Forgot Passwotrd?",
                     style: TextStyle(color: primary),
