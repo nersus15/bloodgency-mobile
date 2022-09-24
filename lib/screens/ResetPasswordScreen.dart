@@ -40,7 +40,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    if (!canSend) _timer.cancel();
     super.dispose();
   }
 
