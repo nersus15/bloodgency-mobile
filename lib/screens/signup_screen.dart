@@ -1,5 +1,6 @@
 import 'package:bloodgency/components/button_component.dart';
 import 'package:bloodgency/screens/login_screen.dart';
+import 'package:bloodgency/screens/verify_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -176,7 +177,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(
                 height: 40,
               ),
-              PrimaryButton(text: "REGISTER", onTap: () {}),
+              PrimaryButton(
+                  text: "REGISTER",
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const VerificationScreen(),
+                      ),
+                    );
+                  }),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -186,11 +196,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginScreen()),
-                      );
+                      Navigator.pop(context);
                     },
                     child: Text(
                       "Log In",
