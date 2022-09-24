@@ -23,6 +23,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   late Timer _timer;
   int _start = 60;
   void startTimer() {
+    _start = 60;
     const onSec = const Duration(seconds: 1);
     _timer = Timer.periodic(onSec, (Timer timer) {
       if (_start == 0) {
