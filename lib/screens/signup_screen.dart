@@ -2,6 +2,7 @@ import 'package:bloodgency/components/button_component.dart';
 import 'package:bloodgency/screens/login_screen.dart';
 import 'package:bloodgency/screens/verify_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
+import 'package:bloodgency/values/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -22,16 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController _address = TextEditingController();
 
   bool isShow = false;
-  List<String> blood_category = [
-    'A+',
-    'A-',
-    'B+',
-    'B-',
-    'AB+',
-    'AB-',
-    'O+',
-    'O-'
-  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

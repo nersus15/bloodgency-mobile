@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
       context: context,
       url: "https://ta.kamscode.site/futsal/ws/logout",
       onError: (response) async {
-        Map<String, dynamic> body = await jsonDecode(response.body);
+        Map<String, dynamic> body = await jsonDecode(response!.body);
         print(body['message']);
         Navigator.pushReplacement(
           context,
@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
         );
       },
       onSuccess: (response) async {
-        List<dynamic> body = await jsonDecode(response.body);
+        List<dynamic> body = await jsonDecode(response!.body);
         print(body);
         Navigator.pushReplacement(
           context,

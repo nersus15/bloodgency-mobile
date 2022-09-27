@@ -1,5 +1,6 @@
 import 'package:bloodgency/components/button_component.dart';
-import 'package:bloodgency/screens/ResetPasswordScreen.dart';
+import 'package:bloodgency/screens/home_screen.dart';
+import 'package:bloodgency/screens/reset_password_screen.dart';
 import 'package:bloodgency/screens/signup_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   height: 50,
                 ),
-                PrimaryButton(text: "LOG IN", onTap: () {}),
+                PrimaryButton(
+                    text: "LOG IN",
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(),
+                        ),
+                      );
+                    }),
                 TextButton(
                   onPressed: () {
                     Navigator.push(

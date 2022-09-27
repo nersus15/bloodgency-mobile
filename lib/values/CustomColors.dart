@@ -7,4 +7,5 @@ const Color primary = Color(0xFFFF2156),
     text = Color(0xFF272A2F),
     subText = Color(0xFF7E7E7E),
     textField = Color(0xFFF8F8F8),
+    background = Color.fromARGB(255, 216, 212, 212),
     backgroundAction = Color(0xFF7E7E7E);

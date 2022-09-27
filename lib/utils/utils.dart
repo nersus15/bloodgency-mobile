@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
-typedef VoidCallbackArg = void Function(http.Response response);
+typedef VoidCallbackArg = void Function(http.Response? response);
 
 class Internet {
   bool isWaiting = false;
@@ -55,12 +56,13 @@ class Internet {
         print("Utils.Internet.fetch Success");
         onSuccess(response);
       } else {
-        print("Utils.Internet.fetch Error");
+        print("Utils.Internet.fetch Error [response code != 200]");
         onError!(response);
       }
     }, onError: (err, stack) {
-      print("Future Error");
+      print("Utils.Internet.fetch Error [request failed]");
       print(err);
+      onError!(null);
     });
   }
 
@@ -129,5 +131,15 @@ class Utils {
     return RegExp(
             r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
         .hasMatch(text);
+  }
+
+  static String waktu({DateTime? time, String format = "dd-MM-yyyy hh:mm"}) {
+    if (time == null) {
+      time = DateTime.now();
+    }
+    String f = DateFormat(
+      format,
+    ).format(time);
+    return f.toString();
   }
 }
