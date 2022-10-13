@@ -129,7 +129,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     Utils.isLogin(context).then((value) {
       setState(() {
         print("IsLogin => " + value.toString());
-        isLogin = value;
+        isLogin = value['isLogin'];
       });
     });
   }
