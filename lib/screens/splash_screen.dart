@@ -19,7 +19,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late bool isLogin = false;
-
+  Map<String, String> headers = {};
+  String? token;
   @override
   void initState() {
     // TODO: implement initState
@@ -27,7 +28,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Utils.isLogin(context).then((value) {
       setState(() {
         print("IsLogin => " + value.toString());
-        isLogin = value;
+        isLogin = value['isLogin'];
+        token = value['token'];
       });
     });
     Utils.internet.fetch(
@@ -59,6 +61,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLogin) {
+      headers['Authorization'] = 'Bearer ${token}';
+    }
     bool isWaiting = false;
 
     return Container(

@@ -192,9 +192,10 @@ class Utils {
     return f.toString();
   }
 
-  static Future<bool> isLogin(BuildContext context) async {
+  static Future<Map<String, dynamic>> isLogin(BuildContext context) async {
     final localStorage = Localstore.instance;
     bool isExpired = false;
+    String? tkn;
 
     Map<String, dynamic>? token =
         await localStorage.collection('auth').doc('token').get();
@@ -205,7 +206,9 @@ class Utils {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Session Anda sudah kadaluarsa, silahkan login ulang"),
       ));
+    } else {
+      tkn = token!['token'];
     }
-    return token != null && !isExpired;
+    return {"isLogin": token != null && !isExpired, "token": tkn};
   }
 }
