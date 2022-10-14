@@ -7,6 +7,7 @@ import 'package:bloodgency/values/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:localstore/localstore.dart';
 
 class ProfileScrenn extends StatefulWidget {
   const ProfileScrenn({super.key});
@@ -273,7 +274,12 @@ class _ProfileScrennState extends State<ProfileScrenn> {
                           boxShadow: boxShadow['medium'],
                         ),
                         child: ListTile(
-                          onTap: () {
+                          onTap: () async {
+                            final localStorage = Localstore.instance;
+                            await localStorage
+                                .collection('auth')
+                                .doc('token')
+                                .delete();
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(

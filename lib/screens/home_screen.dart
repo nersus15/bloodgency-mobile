@@ -1,17 +1,26 @@
+import 'dart:convert';
+
 import 'package:bloodgency/components/bottom_navigation.dart';
 import 'package:bloodgency/components/card_request.dart';
 import 'package:bloodgency/models/features_model.dart';
 import 'package:bloodgency/models/navitationitem_model.dart';
+import 'package:bloodgency/models/request_model.dart';
+import 'package:bloodgency/providers/request_provider.dart';
 import 'package:bloodgency/screens/donation_screen.dart';
 import 'package:bloodgency/screens/find_donor_screen.dart';
+import 'package:bloodgency/screens/login_screen.dart';
 import 'package:bloodgency/screens/not_available_screen.dart';
+import 'package:bloodgency/screens/onboarding_screen.dart';
 import 'package:bloodgency/screens/request_donor_screen.dart';
+import 'package:bloodgency/utils/utils.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:bloodgency/values/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:provider/provider.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,6 +30,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late bool isLogin = false;
+  final detroit = tz.getLocation('Asia/Makassar');
+
+  Map<String, String> headers = {};
+  String? token;
   int currentNavigation = 0;
   List<String> banner = [
     "assets/images/banner.png",
@@ -121,7 +135,51 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Utils.isLogin(context).then((value) {
+      setState(() {
+        isLogin = value['isLogin'];
+        token = value['token'];
+        if (value['isLogin']) {
+          headers['Authorization'] = 'Bearer ${token}';
+        }
+      });
+      if (!value['isLogin']) {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            ));
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final requestProvider =
+        Provider.of<BloodRequestProvider>(context, listen: true);
+    List<DonationRequestModel> requests = requestProvider.getRequest;
+    if (isLogin && requests.length == 0) {
+      Utils.internet.fetch(
+        context: context,
+        url: Endpoint['request_lists'],
+        headers: headers,
+        onError: (response) async {
+          Map<String, dynamic> body = await jsonDecode(response!.body);
+          print(body);
+        },
+        onSuccess: (response) async {
+          Map<String, dynamic> body = await jsonDecode(response!.body);
+          requestProvider.setRequest(body['data']);
+        },
+        onNoInternet: () {},
+      );
+    }
+    DateTime waktu = DateTime.parse(requests.first.waktu);
+    var selisih = DateTime.now().difference(waktu);
+
     return Scaffold(
       backgroundColor: white,
       appBar: AppBar(
@@ -264,12 +322,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 8,
                       ),
                       DonorRequestCard(
-                        terkumpul: 0,
-                        total: 10,
-                        pasien: "Amir Hamza",
-                        lokasi: "RS. Umum Provinsi NTB",
-                        waktu: "5 menit yang lalu",
-                        darah: "b+",
+                        terkumpul: requests.first.terkumpul,
+                        total: requests.first.total,
+                        pasien: requests.first.pasien,
+                        lokasi: requests.first.lokasi,
+                        waktu: selisih.inMinutes > 60
+                            ? tz.TZDateTime.from(waktu, detroit).toString()
+                            : "${selisih.inMinutes} Menit yang lalu",
+                        darah: requests.first.darah.toLowerCase(),
                       ),
                     ],
                   ),

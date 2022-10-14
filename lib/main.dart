@@ -4,8 +4,11 @@ import 'package:bloodgency/screens/splash_screen.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   runApp(const MyApp());
 }
 

@@ -44,7 +44,8 @@ dependencies:
   positioned_tap_detector_2: ^1.0.4
   jwt_decoder: ^2.0.1
   loading_animation_widget: ^1.2.0+3
-
+  timezone: any
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

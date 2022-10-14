@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-const BASEURL = "https://e436-114-125-110-148.ap.ngrok.io";
+const BASEURL = "https://0a67-182-1-99-118.ap.ngrok.io";
 const Map<String, dynamic> Endpoint = {
   "login": "$BASEURL/auth/login",
   "logout": "$BASEURL/auth/logout",

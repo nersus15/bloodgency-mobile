@@ -2,6 +2,7 @@ import 'package:bloodgency/components/appbar.dart';
 import 'package:bloodgency/components/bottom_navigation.dart';
 import 'package:bloodgency/components/card_request.dart';
 import 'package:bloodgency/models/request_model.dart';
+import 'package:bloodgency/providers/request_provider.dart';
 import 'package:bloodgency/screens/request_donor_screen.dart';
 import 'package:bloodgency/utils/utils.dart';
 import 'package:bloodgency/values/CustomColors.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:faker/faker.dart';
+import 'package:provider/provider.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 class DonationRequestScreen extends StatefulWidget {
   const DonationRequestScreen({Key? key}) : super(key: key);
@@ -23,27 +26,11 @@ class _DonationRequestScreenState extends State<DonationRequestScreen> {
   bool _showAppbar = true;
   ScrollController _scrollViewController = new ScrollController();
   bool isScrollingDown = false;
-
+  final detroit = tz.getLocation("Asia/Makassar");
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    requests = List.generate(
-      100,
-      (index) => DonationRequestModel.fromMap({
-        'pasien': faker.person.name(),
-        'lokasi': faker.address.city(),
-        'darah': faker.randomGenerator
-            .fromPattern(["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]),
-        'waktu': Utils.waktu(
-          time: faker.date.dateTime(maxYear: 2022, minYear: 2022),
-        ),
-        'total': int.parse(faker.randomGenerator.fromCharSet("123456789", 2)),
-        'terkumpul':
-            int.parse(faker.randomGenerator.fromCharSet("123456789", 1)),
-      }),
-    );
     _scrollViewController.addListener(() {
       if (_scrollViewController.position.userScrollDirection ==
           ScrollDirection.reverse) {
@@ -75,7 +62,9 @@ class _DonationRequestScreenState extends State<DonationRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(_showAppbar);
+    final requestProvider = Provider.of<BloodRequestProvider>(context);
+    requests = requestProvider.getRequest;
+
     return Scaffold(
       backgroundColor: white,
       body: SafeArea(
@@ -95,11 +84,15 @@ class _DonationRequestScreenState extends State<DonationRequestScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List<Widget>.generate(requests.length, (index) {
                       DonationRequestModel request = requests[index];
+                      var waktu = DateTime.parse(request.waktu);
+                      var selisih = DateTime.now().difference(waktu);
                       return DonorRequestCard(
                         pasien: request.pasien,
                         lokasi: request.lokasi,
                         darah: request.darah,
-                        waktu: request.waktu,
+                        waktu: selisih.inMinutes > 60
+                            ? tz.TZDateTime.from(waktu, detroit).toString()
+                            : "${selisih.inMinutes} Menit yang lalu",
                         terkumpul: request.terkumpul,
                         total: request.total,
                         borderRadius: BorderRadius.circular(10),

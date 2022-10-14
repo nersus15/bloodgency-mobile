@@ -201,13 +201,13 @@ class Utils {
         await localStorage.collection('auth').doc('token').get();
     if (token != null) {
       isExpired = JwtDecoder.isExpired(token['token']);
+      tkn = token['token'];
     }
     if (isExpired) {
+      tkn = null;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Session Anda sudah kadaluarsa, silahkan login ulang"),
       ));
-    } else {
-      tkn = token!['token'];
     }
     return {"isLogin": token != null && !isExpired, "token": tkn};
   }

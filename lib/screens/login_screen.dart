@@ -46,12 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
             .doc('token')
             .set({'token': body['token']});
 
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => HomeScreen(),
-        //   ),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(),
+          ),
+        );
       },
       onError: (response) async {
         Map<String, dynamic> body = await jsonDecode(response!.body);
