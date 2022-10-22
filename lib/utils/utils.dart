@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:localstore/localstore.dart';
@@ -91,8 +92,8 @@ class Internet {
       }
     }, onError: (err, stack) {
       print("Utils.Internet.fetch Error [request failed]");
-      print(err);
-      onError!(null);
+      print(err.toString());
+      onError!(Response(jsonEncode({'err': err.toString()}), 500));
     });
   }
 
@@ -107,10 +108,23 @@ class Internet {
     VoidCallback? onNoInternet,
     Map<String, String>? headers,
     Object? body,
+    bool autoIncludeAuthToken: false,
   }) async {
     try {
       print("Utils.Internet.fetch Checking Internet");
       final result = await InternetAddress.lookup('google.com');
+      if (autoIncludeAuthToken) {
+        Map<String, dynamic> val =
+            await Utils.isLogin(context).then((value) => value);
+        if (val['isLogin']) {
+          if (headers == null) {
+            headers = {'Authorization': 'Bearer ${val['token']}'};
+          } else {
+            headers['Authorization'] = 'Bearer ${val['token']}';
+          }
+        }
+      }
+
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
         isConnected = true;
         String suffix = '';
@@ -209,6 +223,30 @@ class Utils {
         content: Text("Session Anda sudah kadaluarsa, silahkan login ulang"),
       ));
     }
-    return {"isLogin": token != null && !isExpired, "token": tkn};
+    return {
+      "isLogin": token != null && !isExpired,
+      "token": tkn,
+      "account": tkn != null && !isExpired ? JwtDecoder.decode(tkn) : {}
+    };
+  }
+
+  static Future<Map<String, dynamic>> MyAccount() async {
+    final localStorage = Localstore.instance;
+    bool isExpired = false;
+    String? tkn;
+
+    Map<String, dynamic>? token =
+        await localStorage.collection('auth').doc('token').get();
+    if (token != null) {
+      isExpired = JwtDecoder.isExpired(token['token']);
+      tkn = token['token'];
+    }
+    if (isExpired) {
+      tkn = null;
+    }
+    return {
+      "token": tkn,
+      "account": tkn != null && !isExpired ? JwtDecoder.decode(tkn)['data'] : {}
+    };
   }
 }

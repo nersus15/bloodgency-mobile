@@ -13,10 +13,17 @@ class BloodRequestProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addToFirst(Map<String, dynamic> request) {
+    _requests.insert(0, DonationRequestModel.fromMap(request));
+    notifyListeners();
+  }
+
   void setRequest(List<dynamic> listRequests) {
     _requests = [];
     listRequests.forEach((e) {
-      _requests.add(DonationRequestModel.fromMap(e));
+      if (e['total'] != e['terkumpul']) {
+        _requests.add(DonationRequestModel.fromMap(e));
+      }
     });
     notifyListeners();
   }

@@ -1,7 +1,14 @@
+import 'dart:convert';
+
+import 'package:bloodgency/models/request_model.dart';
+import 'package:bloodgency/utils/utils.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:bloodgency/values/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
+typedef onDonate = void Function();
 
 class DonorRequestCard extends StatelessWidget {
   const DonorRequestCard({
@@ -13,12 +20,16 @@ class DonorRequestCard extends StatelessWidget {
     required this.total,
     BorderRadius? this.borderRadius,
     EdgeInsetsGeometry? this.margin,
+    required this.request,
     Key? key,
+    onDonate? this.donate,
   }) : super(key: key);
   final String pasien, lokasi, darah, waktu;
   final int terkumpul, total;
   final BorderRadius? borderRadius;
   final EdgeInsetsGeometry? margin;
+  final DonationRequestModel request;
+  final onDonate? donate;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +131,9 @@ class DonorRequestCard extends StatelessWidget {
                   )),
               GestureDetector(
                 onTap: () {
-                  print("Donate");
+                  if (donate != null) {
+                    donate!();
+                  }
                 },
                 child: Container(
                   margin: EdgeInsets.only(top: 20),

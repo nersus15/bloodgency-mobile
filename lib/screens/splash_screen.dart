@@ -70,15 +70,17 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     bool isWaiting = false;
 
-    return Container(
-      color: primary,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Spacer(),
-          Image(image: AssetImage("assets/images/splash_logo.png")),
-          Image(image: AssetImage("assets/images/splash_footer.png")),
-        ],
+    return Scaffold(
+      body: Container(
+        color: primary,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Spacer(),
+            Image(image: AssetImage("assets/images/splash_logo.png")),
+            Image(image: AssetImage("assets/images/splash_footer.png")),
+          ],
+        ),
       ),
     );
   }

@@ -45,6 +45,7 @@ dependencies:
   jwt_decoder: ^2.0.1
   loading_animation_widget: ^1.2.0+3
   timezone: any
+  web_socket_channel: ^2.2.0
   
 dev_dependencies:
   flutter_test:

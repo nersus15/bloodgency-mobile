@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:bloodgency/components/appbar.dart';
 import 'package:bloodgency/components/button_component.dart';
 import 'package:bloodgency/components/map_zoom_button.dart';
 import 'package:bloodgency/components/text_editing.dart';
+import 'package:bloodgency/screens/home_screen.dart';
+import 'package:bloodgency/utils/utils.dart';
 import 'package:bloodgency/values/CustomColors.dart';
 import 'package:bloodgency/values/constant.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +15,9 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:positioned_tap_detector_2/positioned_tap_detector_2.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class RequestDonorScreen extends StatefulWidget {
   const RequestDonorScreen({Key? key}) : super(key: key);
@@ -21,15 +27,17 @@ class RequestDonorScreen extends StatefulWidget {
 }
 
 class _RequestDonorScreenState extends State<RequestDonorScreen> {
-  bool _showAppbar = true;
+  bool _showAppbar = true, _isLoading = false;
   ScrollController _scrollViewController = new ScrollController();
   bool isScrollingDown = false;
   String _blood = 'A+';
   TextEditingController _address = new TextEditingController();
+  TextEditingController _koordinat = new TextEditingController();
   TextEditingController _rumahSakit = new TextEditingController();
   TextEditingController _kontak = new TextEditingController();
   TextEditingController _note = new TextEditingController();
   TextEditingController _jumlah = new TextEditingController();
+  TextEditingController _pasien = new TextEditingController();
   String coordinate = "";
   late LatLng tappedPoints;
 
@@ -73,7 +81,11 @@ class _RequestDonorScreenState extends State<RequestDonorScreen> {
                 PrimaryButton(
                   text: "Tutup",
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(),
+                        ));
                   },
                 )
               ],
@@ -148,9 +160,48 @@ class _RequestDonorScreenState extends State<RequestDonorScreen> {
         );
       },
     ).whenComplete(() {
-      _address.text =
+      _koordinat.text =
           "Koordinat: ${tappedPoints.latitude.toStringAsFixed(3)}, ${tappedPoints.longitude.toStringAsFixed(3)}";
     });
+  }
+
+  void sendRequest(BuildContext context, channel) async {
+    Object newData = {
+      'koordinat':
+          "${tappedPoints.latitude.toStringAsFixed(3)}, ${tappedPoints.longitude.toStringAsFixed(3)}",
+      'rs': _rumahSakit.value.text,
+      'darah': _blood,
+      'hp': _kontak.value.text,
+      'des': _note.value.text,
+      'jumlah': _jumlah.value.text,
+      'alamat': _address.value.text,
+      'pasien': _pasien.value.text
+    };
+
+    Utils.internet.fetch(
+        context: context,
+        method: 'POST',
+        autoIncludeAuthToken: true,
+        url: Endpoint['create_request'],
+        body: newData,
+        onSuccess: (response) async {
+          setState(() {
+            _isLoading = false;
+          });
+          showCompleteRequest(context);
+          Map<String, dynamic> body = await jsonDecode(response!.body);
+          print(body['input']);
+          channel.sink.add(jsonEncode(body['input']));
+        },
+        onError: (response) async {
+          setState(() {
+            _isLoading = false;
+          });
+          Map<String, dynamic> body = await jsonDecode(response!.body);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Terjadi kesalahan, " + body['err']),
+          ));
+        });
   }
 
   @override
@@ -196,115 +247,157 @@ class _RequestDonorScreenState extends State<RequestDonorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final channel = WebSocketChannel.connect(
+      Uri.parse('wss://oxidized-sand-search.glitch.me'),
+    );
+
     return Scaffold(
-      backgroundColor: white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            CustomAppBar(
-              title: "Buat Permintaan Darah",
-              show: _showAppbar,
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  color: white,
-                  margin: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                  child: Form(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            showBottomSheet();
-                          },
-                          child: CustomTextEditing(
-                            controller: _address,
-                            hint: "Alamat Rumah Sakit",
-                            shadow: Colors.black54,
-                            enabled: false,
-                            prefixIcon: Icon(
-                              Icons.pin_drop,
-                              color: primary,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        CustomTextEditing(
-                          controller: _rumahSakit,
-                          hint: "Nama Rumah Sakit",
-                          shadow: Colors.black54,
-                          prefixIcon: Icon(
-                            Icons.apartment,
-                            color: primary,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        CustomTextEditing(
-                          hint: "Pilih Golongan Darah",
-                          prefixIcon: Icon(
-                            Icons.bloodtype,
-                            color: primary,
-                          ),
-                          dropdown: true,
-                          options: blood_category.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: new Text(value),
-                            );
-                          }).toList(),
-                        ),
-                        SizedBox(height: 20),
-                        CustomTextEditing(
-                          hint: "Jumlah",
-                          controller: _jumlah,
-                          type: TextInputType.number,
-                          prefixIcon: const Icon(
-                            Icons.bloodtype,
-                            color: primary,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        CustomTextEditing(
-                          hint: "Kontak",
-                          controller: _kontak,
-                          type: TextInputType.phone,
-                          prefixIcon: Icon(
-                            Icons.phone,
-                            color: primary,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        CustomTextEditing(
-                          controller: _note,
-                          hint: "Catatan",
-                          prefixIcon: Icon(
-                            Icons.note,
-                            color: primary,
-                          ),
-                          line: 5,
-                        ),
-                        SizedBox(height: 50),
-                        PrimaryButton(
-                          text: "Minta Darah",
-                          onTap: () async {
-                            showCompleteRequest(context);
-                          },
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+      backgroundColor: _isLoading ? primary : white,
+      body: _isLoading
+          ? Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.white,
+                size: 200,
               ),
             )
-          ],
-        ),
-      ),
+          : SafeArea(
+              child: Column(
+                children: [
+                  CustomAppBar(
+                    title: "Buat Permintaan Darah",
+                    show: _showAppbar,
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Container(
+                        color: white,
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                        child: Form(
+                          child: Column(
+                            children: [
+                              CustomTextEditing(
+                                controller: _pasien,
+                                hint: "Nama Pasien",
+                                shadow: Colors.black54,
+                                prefixIcon: Icon(
+                                  Icons.person,
+                                  color: primary,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              CustomTextEditing(
+                                controller: _address,
+                                hint: "Alamat Rumah Sakit",
+                                shadow: Colors.black54,
+                                prefixIcon: Icon(
+                                  Icons.streetview,
+                                  color: primary,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              GestureDetector(
+                                onTap: () {
+                                  showBottomSheet();
+                                },
+                                child: CustomTextEditing(
+                                  controller: _koordinat,
+                                  hint: "Koordinat Rumah Sakit",
+                                  shadow: Colors.black54,
+                                  enabled: false,
+                                  prefixIcon: Icon(
+                                    Icons.pin_drop,
+                                    color: primary,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              CustomTextEditing(
+                                controller: _rumahSakit,
+                                hint: "Nama Rumah Sakit",
+                                shadow: Colors.black54,
+                                prefixIcon: Icon(
+                                  Icons.apartment,
+                                  color: primary,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              CustomTextEditing(
+                                hint: "Pilih Golongan Darah",
+                                prefixIcon: Icon(
+                                  Icons.bloodtype,
+                                  color: primary,
+                                ),
+                                onChange: (string) {
+                                  setState(() {
+                                    _blood = string;
+                                  });
+                                },
+                                dropdown: true,
+                                options: blood_category.map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: new Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                              SizedBox(height: 20),
+                              CustomTextEditing(
+                                hint: "Jumlah",
+                                controller: _jumlah,
+                                type: TextInputType.number,
+                                prefixIcon: const Icon(
+                                  Icons.bloodtype,
+                                  color: primary,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              CustomTextEditing(
+                                hint: "Kontak",
+                                controller: _kontak,
+                                type: TextInputType.phone,
+                                prefixIcon: Icon(
+                                  Icons.phone,
+                                  color: primary,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              CustomTextEditing(
+                                controller: _note,
+                                hint: "Catatan",
+                                prefixIcon: Icon(
+                                  Icons.note,
+                                  color: primary,
+                                ),
+                                line: 5,
+                              ),
+                              SizedBox(height: 50),
+                              PrimaryButton(
+                                text: "Minta Darah",
+                                onTap: () {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  sendRequest(context, channel);
+                                },
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
     );
   }
 }
